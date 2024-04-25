@@ -535,7 +535,9 @@ class InferManager(base.InferManager):
             wsi_mask = cv2.cvtColor(wsi_mask, cv2.COLOR_BGR2GRAY)
             wsi_mask[wsi_mask > 0] = 1
         else:
-            wsi_mask = np.ones(self.wsi_proc_shape, dtype=np.uint8)
+            #wsi_mask = np.ones(self.wsi_proc_shape, dtype=np.uint8)
+            # use ttb mask instead of all white mask if mask is not provided
+            wsi_mask = self.wsi_handler.tissue_mask().img
         mask_downsample_ratio = wsi_mask.shape[0] / self.wsi_proc_shape[0]
         
         if self.save_mask:

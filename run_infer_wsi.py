@@ -14,14 +14,14 @@ Options:
   --version                   Show version.
   --gpu=<id>                  GPU list. [default: 0]
   --model=<path>              Path to saved checkpoint.
-  --nr_inference_workers=<n>  Number of workers during inference. [default: 0]
-  --nr_post_proc_workers=<n>  Number of workers during post-processing. [default: 0]
+  --nr_inference_workers=<n>  Number of workers during inference. [default: 8]
+  --nr_post_proc_workers=<n>  Number of workers during post-processing. [default: 8]
   --batch_size=<n>            Batch size. [default: 30]
   --tile_shape=<n>            Shape of tile for processing. [default: 2048]
   --chunk_shape=<n>           Shape of tile for processing. [default: 15000]
   --ambiguous_size=<int>      Define ambiguous region along tiling grid to perform re-post processing. [default: 64]
   --wsi_proc_mag=<n>          Microns per pixel used for WSI processing. [default: 0.5]
-  --wsi_file_ext=<str>        File extension of WSIs to process. [default: .svs]
+  --wsi_file_ext=<str>        File extension of WSIs to process. [default: .mrxs]
   --cache_path=<path>         Path for cache. Should be placed on SSD with at least 100GB. [default: cache/]
   --logging_dir=<path>        Path for python logging. [default: logging/]
   --input_dir=<path>          Path to input data directory. Assumes the files are not nested within directory.
