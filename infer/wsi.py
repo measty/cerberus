@@ -43,6 +43,7 @@ from tiatoolbox.models import (
 )
 from tiatoolbox.models.architecture.hovernet import HoVerNet
 from tiatoolbox.wsicore.wsireader import WSIReader, VirtualWSIReader
+from tiatoolbox.tools.tissuemask import MorphologicalMasker
 
 from . import base
 
@@ -537,11 +538,14 @@ class InferManager(base.InferManager):
         else:
             #wsi_mask = np.ones(self.wsi_proc_shape, dtype=np.uint8)
             # use ttb mask instead of all white mask if mask is not provided
-            wsi_mask = self.wsi_handler.tissue_mask().img
+            masker = MorphologicalMasker(kernel_size=16)
+            thumb = self.wsi_handler.slide_thumbnail(resolution=8, units="mpp")
+            wsi_mask = masker.fit_transform([thumb])[0].astype(np.uint8)
+            print(f"created mask with shape: {wsi_mask.shape}")
         mask_downsample_ratio = wsi_mask.shape[0] / self.wsi_proc_shape[0]
         
         if self.save_mask:
-            cv2.imwrite(f"{self.output_dir}/mask/{wsi_basename}.png", self.wsi_mask*255)
+            cv2.imwrite(f"{self.output_dir}/mask/{wsi_basename}.png", wsi_mask*255)
         if self.save_thumb:
             # thumbnail at 1.25x objective magnification
             wsi_thumb = self.wsi_handler.slide_thumbnail(resolution=1.25, units="power") 
@@ -638,8 +642,9 @@ class InferManager(base.InferManager):
 
         # # * ==== Post processing Nuclei
         wsi_inst_info = {}
-        with open("dataset.yml") as fptr:
-            dataset_info = yaml.full_load(fptr)
+        # its not used anywhere so comment out
+        #with open("dataset.yml") as fptr:
+            #dataset_info = yaml.full_load(fptr)
 
         start = time.perf_counter()
         tile_info_sets = self._get_tile_info(self.wsi_proc_shape[::-1], ioconfig_pp)
@@ -688,7 +693,7 @@ class InferManager(base.InferManager):
         # * ==== Post processing Tissue Region Classification
 
         start = time.perf_counter()
-        ds_factor = 0.25
+        ds_factor = 0.125
         if "Patch-Class" in self.model_args["decoder_kwargs"].keys():
             # resize the map tile by tile rather than loading entirely in memory
             map_idx = head_names.index("Patch-Class")
@@ -898,7 +903,7 @@ class InferManager(base.InferManager):
                 {"units": "mpp", "resolution": self.wsi_proc_mag},
             ],
             margin=64,
-            tile_shape=[15000, 15000],
+            tile_shape=[10000, 10000],
             patch_input_shape=[448, 448],
             patch_output_shape=[144, 144],
             stride_shape=[144, 144],
